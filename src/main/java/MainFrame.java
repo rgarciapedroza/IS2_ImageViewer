@@ -18,8 +18,6 @@ public class MainFrame extends JFrame {
         this.add(imagePanel, BorderLayout.CENTER);
 
         this.setTitle("Change image");
-        this.setSize(750, 300);
-        this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         loadImage(model.getPath());
@@ -29,18 +27,14 @@ public class MainFrame extends JFrame {
             public void mousePressed(MouseEvent e) {
                 initialClick = e.getPoint();
             }
-        });
 
-        imagePanel.addMouseMotionListener(new MouseAdapter() {
             @Override
-            public void mouseDragged(MouseEvent e) {
+            public void mouseReleased(MouseEvent e) {
                 int deltaX = e.getX() - initialClick.x;
                 if (deltaX > 50) {
                     nextImage();
-                    initialClick = e.getPoint();
                 } else if (deltaX < -50) {
                     lastImage();
-                    initialClick = e.getPoint();
                 }
             }
         });
@@ -62,15 +56,28 @@ public class MainFrame extends JFrame {
             ImageIcon icon = new ImageIcon(resource);
             Image image = icon.getImage();
             imagePanel.setImage(image);
-        } else {
-            System.err.println("Resource not found: " + filename);
-        }
-    }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            MainFrame frame = new MainFrame();
-            frame.setVisible(true);
-        });
+            int imgWidth = image.getWidth(null);
+            int imgHeight = image.getHeight(null);
+            float aspectRatio = (float) imgWidth / imgHeight;
+
+            int frameWidth = 800;
+            int frameHeight = 600;
+            if (aspectRatio > 1) {
+                frameHeight = (int) (frameWidth / aspectRatio);
+            } else {
+                frameWidth = (int) (frameHeight * aspectRatio);
+            }
+
+            this.setSize(frameWidth, frameHeight);
+
+
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            int x = (screenSize.width - frameWidth) / 2;
+            int y = (screenSize.height - frameHeight) / 2;
+            this.setLocation(x, y);
+        } else {
+            System.err.println("Hubo un error al localizar la imagen: " + filename);
+        }
     }
 }
